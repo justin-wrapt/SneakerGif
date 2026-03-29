@@ -2,562 +2,519 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#08080d">
+<meta name="theme-color" content="#0a0a0a">
 <title>SneakerGif</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 :root{
-  --bg:#08080d;--surface:#12121a;--surface2:#1a1a26;--surface3:#22222e;
-  --text:#e8e6e3;--text2:#9995a0;--text3:#5c5867;
-  --accent:#ff6b6b;--accent2:#ffa36b;--remote:#6b8aff;--remote2:#a36bff;
-  --green:#4ade80;--red:#f87171;
-  --radius:14px;--radius-sm:8px;
-  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --bg:#0a0a0a;--card:#141414;--card2:#1c1c1c;--card3:#252525;
+  --text:#f0f0f0;--text2:#888;--text3:#555;
+  --neon:#c8ff00;--coral:#ff3366;--blue:#00d4ff;
+  --r:16px;--r-sm:10px;
+  --head:'Bebas Neue',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --safe-b:env(safe-area-inset-bottom,0px);
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-body)}
-button{font-family:inherit;border:none;cursor:pointer;outline:none;background:none;color:inherit}
-input,select{font-family:inherit;border:none;outline:none;background:none;color:inherit}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--mono);touch-action:manipulation}
+button{font-family:var(--mono);border:none;cursor:pointer;outline:none;background:none;color:inherit;touch-action:manipulation}
+input,select{font-family:var(--mono);border:none;outline:none;background:none;color:inherit}
 
-.header{display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,12px) 16px 10px;background:linear-gradient(180deg,rgba(8,8,13,.98),rgba(8,8,13,.85));backdrop-filter:blur(20px);position:relative;z-index:100}
-.logo{font-family:var(--font-head);font-weight:800;font-size:18px;letter-spacing:-.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
-.header-right{display:flex;align-items:center;gap:6px}
-.settings-btn{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
-.settings-btn:active{transform:scale(.9)}
-.mode-pills{display:flex;gap:4px}
-.mode-pill{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:20px;transition:all .2s;background:var(--surface2);color:var(--text3)}
-.mode-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 2px 12px rgba(255,107,107,.3)}
-.mode-pill.remote-active{background:linear-gradient(135deg,var(--remote),var(--remote2));box-shadow:0 2px 12px rgba(107,138,255,.3)}
+/* === LAYOUT === */
+.shell{display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden}
+.topbar{
+  padding:calc(env(safe-area-inset-top,8px) + 4px) 16px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);position:relative;z-index:10;
+  border-bottom:2px solid var(--neon);
+}
+.brand{font-family:var(--head);font-size:32px;letter-spacing:2px;color:var(--neon);line-height:1}
+.topbar-btns{display:flex;gap:8px}
+.icon-btn{
+  width:44px;height:44px;border-radius:var(--r-sm);background:var(--card);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  border:1px solid #333;transition:all .15s;
+}
+.icon-btn:active{transform:scale(.9);background:var(--card2)}
 
-.status-bar{display:flex;align-items:center;gap:8px;padding:6px 16px;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);background:var(--surface);border-bottom:1px solid rgba(255,255,255,.04)}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse-dot 2s ease infinite}
-.status-dot.offline{background:var(--red);animation:none}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.content-pad{padding:12px 12px calc(80px + var(--safe-b))}
 
-.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:12px}
-.app-wrap{display:flex;flex-direction:column;height:100%;position:relative}
+/* === BOTTOM NAV === */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  display:flex;
+  background:var(--bg);
+  border-top:2px solid #222;
+  padding:6px 8px calc(var(--safe-b) + 6px);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 0;border-radius:var(--r-sm);transition:all .15s;
+  position:relative;
+}
+.nav-item .nav-icon{font-size:22px;line-height:1}
+.nav-item .nav-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.nav-item.active .nav-label{color:var(--neon)}
+.nav-item.active::before{
+  content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:30px;height:3px;border-radius:2px;background:var(--neon);
+}
+.nav-item.remote.active .nav-label{color:var(--blue)}
+.nav-item.remote.active::before{background:var(--blue)}
 
-/* Search */
-.search-wrap{position:relative;margin-bottom:10px;display:flex;gap:8px}
-.search-input{flex:1;padding:14px 16px 14px 44px;border-radius:var(--radius);background:var(--surface2);font-size:16px;color:var(--text);border:1px solid transparent;transition:border .2s}
-.search-input::placeholder{color:var(--text3)}
-.search-input:focus{border-color:var(--accent)}
-.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:18px}
-.provider-select{padding:10px 12px;border-radius:var(--radius);background:var(--surface2);font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);min-width:90px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235c5867'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
-.provider-select option{background:var(--surface2);color:var(--text)}
+/* === SEARCH === */
+.search-bar{
+  display:flex;gap:8px;margin-bottom:12px;
+}
+.search-field{
+  flex:1;position:relative;
+}
+.search-field input{
+  width:100%;padding:16px 16px 16px 48px;border-radius:var(--r);
+  background:var(--card);font-size:16px;color:var(--text);
+  border:2px solid #333;transition:border .2s;
+}
+.search-field input:focus{border-color:var(--neon)}
+.search-field input::placeholder{color:var(--text3)}
+.search-field .s-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--text3)}
+.prov-btn{
+  padding:16px 14px;border-radius:var(--r);background:var(--card);
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);
+  border:2px solid #333;min-width:80px;text-align:center;white-space:nowrap;
+}
+.prov-btn:active{border-color:var(--neon);color:var(--neon)}
 
-/* URL input for direct paste */
-.url-input-wrap{display:flex;gap:8px;margin-bottom:14px}
-.url-input{flex:1;padding:12px 14px;border-radius:var(--radius);background:var(--surface2);font-size:14px;color:var(--text);border:1px solid transparent;transition:border .2s}
-.url-input:focus{border-color:var(--accent)}
-.url-add-btn{padding:12px 18px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),var(--accent2));font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;white-space:nowrap}
+/* URL paste */
+.url-bar{display:flex;gap:8px;margin-bottom:14px}
+.url-bar input{
+  flex:1;padding:14px 16px;border-radius:var(--r);background:var(--card);
+  font-size:14px;border:2px solid #333;
+}
+.url-bar input:focus{border-color:var(--neon)}
+.url-bar input::placeholder{color:var(--text3)}
+.url-bar button{
+  padding:14px 20px;border-radius:var(--r);
+  background:var(--neon);color:#000;font-weight:600;font-size:12px;letter-spacing:.06em;
+}
+.url-bar button:active{opacity:.8}
 
-.search-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.search-result{border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;position:relative;aspect-ratio:16/10;background:var(--surface);transition:transform .15s}
-.search-result:active{transform:scale(.95)}
-.search-result img{width:100%;height:100%;object-fit:cover}
-.search-result .add-badge{position:absolute;bottom:6px;right:6px;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:0;transition:opacity .2s}
-.search-result:hover .add-badge,.search-result:active .add-badge{opacity:1}
-.search-result .provider-badge{position:absolute;top:4px;left:4px;padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:7px;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.6);color:var(--text2);backdrop-filter:blur(4px)}
+/* === RESULTS GRID === */
+.results{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.result-card{
+  border-radius:var(--r-sm);overflow:hidden;position:relative;
+  aspect-ratio:16/10;background:var(--card);
+  border:2px solid transparent;transition:all .12s;
+}
+.result-card:active{transform:scale(.96);border-color:var(--neon)}
+.result-card img{width:100%;height:100%;object-fit:cover}
+.result-card .r-badge{
+  position:absolute;top:6px;left:6px;padding:3px 7px;border-radius:4px;
+  font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(0,0,0,.7);color:var(--text2);backdrop-filter:blur(4px);
+}
+.result-card .r-add{
+  position:absolute;bottom:8px;right:8px;width:36px;height:36px;border-radius:50%;
+  background:var(--neon);color:#000;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:700;box-shadow:0 2px 10px rgba(200,255,0,.3);
+}
 
-.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin-bottom:4px;scrollbar-width:none}
-.cat-tabs::-webkit-scrollbar{display:none}
-.cat-tab{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:var(--surface2);color:var(--text3);transition:all .2s}
-.cat-tab.active{background:var(--surface3);color:var(--text)}
+/* === CATEGORY PILLS === */
+.cats{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat-pill{
+  padding:10px 18px;border-radius:30px;white-space:nowrap;flex-shrink:0;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--card);color:var(--text3);border:2px solid #333;
+  transition:all .15s;
+}
+.cat-pill.active{border-color:var(--neon);color:var(--neon);background:rgba(200,255,0,.08)}
+.cat-pill:active{transform:scale(.95)}
 
-.deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding-bottom:80px}
-.deck-card{border-radius:var(--radius-sm);overflow:hidden;position:relative;cursor:pointer;aspect-ratio:4/3;background:var(--surface);transition:transform .12s}
-.deck-card:active{transform:scale(.93)}
-.deck-card img{width:100%;height:100%;object-fit:cover}
-.deck-card .card-label{position:absolute;bottom:0;left:0;right:0;padding:4px 8px;font-family:var(--font-mono);font-size:8px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(transparent,rgba(0,0,0,.8));color:var(--text2)}
-.deck-card .card-delete{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--red);opacity:0;transition:opacity .2s}
-.deck-card:hover .card-delete{opacity:1}
+/* === DECK GRID === */
+.deck{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding-bottom:20px}
+.deck-item{
+  border-radius:var(--r-sm);overflow:hidden;position:relative;
+  aspect-ratio:4/3;background:var(--card);border:2px solid #222;
+  transition:all .12s;
+}
+.deck-item:active{transform:scale(.96);border-color:var(--neon)}
+.deck-item img{width:100%;height:100%;object-fit:cover}
+.deck-item .d-label{
+  position:absolute;bottom:0;left:0;right:0;padding:6px 10px;
+  font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));color:var(--text2);
+}
+.deck-item .d-del{
+  position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--coral);
+  border:1px solid rgba(255,51,102,.3);
+}
 
-.ctrl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-bottom:80px}
-.ctrl-card{border-radius:var(--radius-sm);overflow:hidden;position:relative;cursor:pointer;aspect-ratio:4/3;background:var(--surface);border:2px solid transparent;transition:all .15s}
-.ctrl-card:active{transform:scale(.92);border-color:var(--remote)}
-.ctrl-card.sent{border-color:var(--remote);box-shadow:0 0 16px rgba(107,138,255,.3)}
-.ctrl-card img{width:100%;height:100%;object-fit:cover}
-.ctrl-clear{position:fixed;bottom:env(safe-area-inset-bottom,20px);left:50%;transform:translateX(-50%);padding:14px 40px;border-radius:40px;background:linear-gradient(135deg,var(--remote),var(--remote2));font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;box-shadow:0 4px 20px rgba(107,138,255,.4);z-index:50}
+/* === CTRL GRID === */
+.ctrl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-bottom:20px}
+.ctrl-item{
+  border-radius:var(--r-sm);overflow:hidden;position:relative;
+  aspect-ratio:4/3;background:var(--card);border:3px solid transparent;
+  transition:all .12s;
+}
+.ctrl-item:active{transform:scale(.93);border-color:var(--blue)}
+.ctrl-item.sent{border-color:var(--blue);box-shadow:0 0 20px rgba(0,212,255,.25)}
+.ctrl-item img{width:100%;height:100%;object-fit:cover}
+.clear-btn{
+  position:fixed;bottom:calc(80px + var(--safe-b) + 12px);left:50%;transform:translateX(-50%);
+  padding:16px 48px;border-radius:40px;
+  background:var(--coral);color:#fff;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  box-shadow:0 4px 24px rgba(255,51,102,.35);z-index:40;
+}
+.clear-btn:active{transform:translateX(-50%) scale(.95)}
 
-.fullscreen{position:fixed;inset:0;z-index:200;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.fullscreen.visible{opacity:1;pointer-events:auto}
-.fullscreen img{max-width:100%;max-height:100%;object-fit:contain}
-.fullscreen-close{position:absolute;top:env(safe-area-inset-top,16px);right:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;backdrop-filter:blur(8px)}
+/* === FULLSCREEN === */
+.fs{position:fixed;inset:0;z-index:200;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.fs.on{opacity:1;pointer-events:auto}
+.fs img{max-width:100%;max-height:100%;object-fit:contain}
+.fs-x{position:absolute;top:calc(env(safe-area-inset-top,12px) + 8px);right:12px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;backdrop-filter:blur(8px)}
 
-.toolbar{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:10px 16px calc(env(safe-area-inset-bottom,8px) + 10px);background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:8px;justify-content:center}
-.tool-btn{padding:10px 18px;border-radius:var(--radius);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:var(--surface2);color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:6px}
-.tool-btn:active{transform:scale(.95)}
-.tool-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
-.empty-icon{font-size:48px;margin-bottom:16px;opacity:.6}
-.empty-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:8px}
-.empty-sub{font-size:14px;color:var(--text3);line-height:1.5;max-width:280px}
-
-.toast{position:fixed;top:calc(env(safe-area-inset-top,12px) + 60px);left:50%;transform:translateX(-50%) translateY(-20px);padding:10px 20px;border-radius:20px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.04em;background:var(--surface3);color:var(--text);z-index:300;opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(12px)}
+/* === TOAST === */
+.toast{
+  position:fixed;top:calc(env(safe-area-inset-top,12px) + 56px);left:50%;
+  transform:translateX(-50%) translateY(-16px);
+  padding:12px 24px;border-radius:30px;
+  font-size:12px;font-weight:600;letter-spacing:.04em;
+  background:var(--neon);color:#000;z-index:300;
+  opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;
+}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.modal-overlay{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-overlay.show{opacity:1;pointer-events:auto}
-.modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:20px 16px calc(env(safe-area-inset-bottom,8px) + 20px);width:100%;max-width:500px;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.3,1);max-height:85vh;overflow-y:auto}
-.modal-overlay.show .modal{transform:translateY(0)}
-.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:16px}
-.modal-input{width:100%;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);font-size:15px;color:var(--text);margin-bottom:12px;border:1px solid rgba(255,255,255,.06)}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end}
-.modal-btn{padding:10px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:all .2s}
-.modal-btn.cancel{background:var(--surface2);color:var(--text2)}
-.modal-btn.confirm{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.cat-select{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.cat-opt{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:16px;background:var(--surface2);color:var(--text3);transition:all .2s;cursor:pointer}
-.cat-opt.selected{background:var(--accent);color:#fff}
+/* === MODAL === */
+.modal-bg{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.show{opacity:1;pointer-events:auto}
+.modal-box{
+  background:var(--card);border-radius:var(--r) var(--r) 0 0;
+  padding:20px 16px calc(var(--safe-b) + 20px);width:100%;max-width:500px;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.3,1);
+  max-height:88vh;overflow-y:auto;
+}
+.modal-bg.show .modal-box{transform:translateY(0)}
+.m-title{font-family:var(--head);font-size:28px;letter-spacing:1px;margin-bottom:16px;color:var(--neon)}
+.m-input{
+  width:100%;padding:14px 16px;border-radius:var(--r-sm);
+  background:var(--card2);font-size:15px;color:var(--text);margin-bottom:12px;
+  border:2px solid #333;
+}
+.m-input:focus{border-color:var(--neon)}
+.m-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.m-btn{padding:14px 24px;border-radius:var(--r-sm);font-size:13px;font-weight:600;letter-spacing:.04em;transition:all .15s}
+.m-btn:active{transform:scale(.96)}
+.m-btn.cancel{background:var(--card2);color:var(--text2);border:1px solid #333}
+.m-btn.go{background:var(--neon);color:#000}
+.cat-pick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.cat-pick .cp{
+  padding:8px 16px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--card2);color:var(--text3);border:2px solid #333;transition:all .15s;
+}
+.cat-pick .cp.sel{border-color:var(--neon);color:var(--neon);background:rgba(200,255,0,.08)}
+.cat-pick .cp:active{transform:scale(.95)}
 
-/* Settings panel */
-.settings-group{margin-bottom:20px}
-.settings-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.settings-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.settings-row .provider-name{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.04em;min-width:70px;color:var(--text2)}
-.settings-key-input{flex:1;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);font-family:var(--font-mono);font-size:12px;color:var(--text);border:1px solid rgba(255,255,255,.06)}
-.settings-key-input::placeholder{color:var(--text3)}
-.settings-toggle{width:44px;height:24px;border-radius:12px;background:var(--surface3);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-.settings-toggle.on{background:var(--green)}
-.settings-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
-.settings-toggle.on::after{transform:translateX(20px)}
-.settings-hint{font-size:11px;color:var(--text3);line-height:1.4;margin-top:4px}
+/* === SETTINGS === */
+.s-group{margin-bottom:24px}
+.s-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.s-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.s-row .s-name{font-size:12px;font-weight:600;min-width:65px;color:var(--text2)}
+.s-key{flex:1;padding:12px 14px;border-radius:var(--r-sm);background:var(--card2);font-size:12px;color:var(--text);border:2px solid #333}
+.s-key:focus{border-color:var(--neon)}
+.s-key::placeholder{color:var(--text3)}
+.s-toggle{width:48px;height:28px;border-radius:14px;background:#333;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:2px solid #444}
+.s-toggle.on{background:var(--neon);border-color:var(--neon)}
+.s-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.s-toggle.on::after{transform:translateX(20px)}
+.s-hint{font-size:11px;color:var(--text3);line-height:1.5;margin-top:6px}
 
-/* Help */
-.help-section{margin-bottom:20px}
-.help-section h3{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.help-section h3 .h-icon{font-size:18px}
-.help-section p,.help-section li{font-size:13px;color:var(--text2);line-height:1.6}
-.help-section ul{padding-left:18px;margin-top:4px}
-.help-section li{margin-bottom:4px}
-.help-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle}
-.help-badge.prep{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.help-badge.live{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.help-badge.show{background:linear-gradient(135deg,var(--remote),var(--remote2));color:#fff}
-.help-badge.ctrl{background:linear-gradient(135deg,var(--remote),var(--remote2));color:#fff}
-.help-divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0}
+/* === HELP === */
+.h-section{margin-bottom:20px}
+.h-section h3{font-family:var(--head);font-size:22px;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.h-section p,.h-section li{font-size:13px;color:var(--text2);line-height:1.7}
+.h-section ul{padding-left:18px;margin-top:4px}
+.h-section li{margin-bottom:4px}
+.h-section li strong{color:var(--text)}
+.h-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
+.h-badge.prep{background:var(--neon);color:#000}
+.h-badge.live{background:var(--neon);color:#000}
+.h-badge.show{background:var(--blue);color:#000}
+.h-badge.ctrl{background:var(--blue);color:#000}
+.h-divider{height:2px;background:#222;margin:16px 0}
+.h-step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.h-step-num{width:28px;height:28px;border-radius:50%;background:var(--neon);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.h-step-text{font-size:13px;color:var(--text2);line-height:1.6;flex:1}
+.h-step-text strong{color:var(--text)}
+.h-step-text code{background:var(--card2);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--neon)}
 
-@keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{animation:fade-in .3s ease both}
+/* === EMPTY === */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.empty-icon{font-size:52px;margin-bottom:16px}
+.empty-title{font-family:var(--head);font-size:28px;letter-spacing:1px;margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--text3);line-height:1.6;max-width:280px}
+
+/* === SHOW MODE WAITING === */
+.show-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
+.show-pulse{width:80px;height:80px;border-radius:50%;border:3px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:36px;animation:show-ring 2s ease infinite;margin-bottom:20px}
+@keyframes show-ring{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.3)}50%{box-shadow:0 0 0 20px rgba(0,212,255,0)}}
+.show-status{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fade-up .25s ease both}
 </style>
 </head>
 <body>
-<div class="app-wrap" id="app">
-  <div class="header">
-    <div class="logo" onclick="state.mode='prep';render()">SNEAKERGIF</div>
-    <div class="header-right">
-      <div class="mode-pills">
-        <button class="mode-pill active" data-mode="prep">PREP</button>
-        <button class="mode-pill" data-mode="live">LIVE</button>
-        <button class="mode-pill" data-mode="show">SHOW</button>
-        <button class="mode-pill" data-mode="ctrl">CTRL</button>
-      </div>
-      <button class="settings-btn" onclick="showHelp()">?</button>
-      <button class="settings-btn" onclick="showSettings()">&#x2699;</button>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">SNEAKERGIF</div>
+    <div class="topbar-btns">
+      <button class="icon-btn" onclick="showHelp()">?</button>
+      <button class="icon-btn" onclick="showSettings()">&#x2699;</button>
     </div>
   </div>
-  <div class="status-bar">
-    <div class="status-dot" id="statusDot"></div>
-    <span id="statusText">DECK: 0 GIFS</span>
-    <span style="margin-left:auto" id="modeLabel">PREP MODE</span>
-  </div>
-  <div class="main" id="mainContent"></div>
-  <div class="toolbar" id="toolbar"></div>
+  <div class="content"><div class="content-pad" id="main"></div></div>
+  <nav class="nav">
+    <button class="nav-item active" data-m="prep"><span class="nav-icon">&#x1F50D;</span><span class="nav-label">Prep</span></button>
+    <button class="nav-item" data-m="live"><span class="nav-icon">&#x26A1;</span><span class="nav-label">Live</span></button>
+    <button class="nav-item remote" data-m="show"><span class="nav-icon">&#x1F4FA;</span><span class="nav-label">Show</span></button>
+    <button class="nav-item remote" data-m="ctrl"><span class="nav-icon">&#x1F3AE;</span><span class="nav-label">Ctrl</span></button>
+  </nav>
 </div>
-<div class="fullscreen" id="fullscreen"><img id="fullscreenImg" src="" alt=""><button class="fullscreen-close" id="fullscreenClose">&times;</button></div>
+<div class="fs" id="fs"><img id="fsImg" src="" alt=""><button class="fs-x" id="fsX">&times;</button></div>
 <div class="toast" id="toast"></div>
-<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modal"></div></div>
+<div class="modal-bg" id="mbg"><div class="modal-box" id="mbox"></div></div>
 
 <script>
-const CATEGORIES = ['all','yes','no','mind-blown','laugh','think','celebrate','cringe','custom'];
-const POLL_MS = 600;
-
-// === PROVIDER SYSTEM ===
-const PROVIDERS = {
-  giphy: {
-    name: 'Giphy', defaultKey: 'dc6zaTOxFJmzC',
-    async search(q, key) {
-      const r = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${key}&q=${encodeURIComponent(q)}&limit=24&rating=pg-13`);
-      const d = await r.json();
-      return (d.data||[]).map(g => ({
-        id: 'giphy-'+g.id, url: g.images.fixed_width.url,
-        preview: g.images.fixed_width_small?.url || g.images.fixed_width.url,
-        width: parseInt(g.images.fixed_width.width), height: parseInt(g.images.fixed_width.height),
-        title: g.title, provider: 'giphy',
-      }));
-    }
-  },
-  gfycat: {
-    name: 'Gfycat', defaultKey: '',
-    async search(q, key) {
-      const r = await fetch(`https://api.gfycat.com/v1/gfycats/search?search_text=${encodeURIComponent(q)}&count=24`);
-      const d = await r.json();
-      return (d.gfycats||[]).map(g => ({
-        id: 'gfycat-'+g.gfyId, url: g.max2mbGif || g.gifUrl || g.gif100px,
-        preview: g.gif100px || g.max2mbGif || g.gifUrl,
-        width: g.width||480, height: g.height||270,
-        title: g.title || g.gfyName, provider: 'gfycat',
-      }));
-    }
-  },
-  imgur: {
-    name: 'Imgur', defaultKey: '',
-    async search(q, key) {
-      const headers = key ? {'Authorization': `Client-ID ${key}`} : {};
-      const r = await fetch(`https://api.imgur.com/3/gallery/search/?q=${encodeURIComponent(q)}&q_type=anigif`, {headers});
-      const d = await r.json();
-      const items = (d.data||[]).flatMap(item => {
-        if (item.images) return item.images.filter(i => i.animated);
-        if (item.animated) return [item];
-        return [];
-      });
-      return items.slice(0,24).map(g => ({
-        id: 'imgur-'+g.id, url: g.link,
-        preview: g.link?.replace(/\.gif/, 'l.gif') || g.link,
-        width: g.width||480, height: g.height||270,
-        title: g.title || g.description || 'GIF', provider: 'imgur',
-      }));
-    }
-  },
+const CATS=['all','yes','no','mind-blown','laugh','think','celebrate','cringe','custom'];
+const POLL=600;
+const P={
+  giphy:{name:'Giphy',dk:'dc6zaTOxFJmzC',async search(q,k){const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${k}&q=${encodeURIComponent(q)}&limit=20&rating=pg-13`);const d=await r.json();return(d.data||[]).map(g=>({id:'giphy-'+g.id,url:g.images.fixed_width.url,preview:g.images.fixed_width_small?.url||g.images.fixed_width.url,w:+g.images.fixed_width.width,h:+g.images.fixed_width.height,title:g.title,prov:'giphy'}))}},
+  gfycat:{name:'Gfycat',dk:'',async search(q,k){const r=await fetch(`https://api.gfycat.com/v1/gfycats/search?search_text=${encodeURIComponent(q)}&count=20`);const d=await r.json();return(d.gfycats||[]).map(g=>({id:'gfy-'+g.gfyId,url:g.max2mbGif||g.gifUrl||g.gif100px,preview:g.gif100px||g.max2mbGif,w:g.width||480,h:g.height||270,title:g.title||g.gfyName,prov:'gfycat'}))}},
+  imgur:{name:'Imgur',dk:'',async search(q,k){const h=k?{'Authorization':`Client-ID ${k}`}:{};const r=await fetch(`https://api.imgur.com/3/gallery/search/?q=${encodeURIComponent(q)}&q_type=anigif`,{headers:h});const d=await r.json();return(d.data||[]).flatMap(i=>i.images?i.images.filter(x=>x.animated):[i.animated?i:[]].flat()).slice(0,20).map(g=>({id:'img-'+g.id,url:g.link,preview:g.link,w:g.width||480,h:g.height||270,title:g.title||'GIF',prov:'imgur'}))}},
 };
 
-// === STATE ===
-let state = {
-  mode: 'prep', deck: [], activeCat: 'all', searchResults: [], searching: false,
-  fullscreenGif: null, lastCmd: null, pollTimer: null, activeProvider: 'giphy',
-};
+let S={mode:'prep',deck:[],cat:'all',results:[],busy:false,lastCmd:null,poll:null,prov:'giphy'};
+let settings=loadS();
 
-// === SETTINGS PERSISTENCE ===
-function loadSettings() {
-  try {
-    const s = localStorage.getItem('gif-settings');
-    if (s) return JSON.parse(s);
-  } catch(e) {}
-  return { giphy: { key: PROVIDERS.giphy.defaultKey, enabled: true },
-           gfycat: { key: '', enabled: true },
-           imgur: { key: '', enabled: true } };
-}
-function saveSettings(settings) {
-  try { localStorage.setItem('gif-settings', JSON.stringify(settings)); } catch(e) {}
-}
-let settings = loadSettings();
+function loadS(){try{const s=localStorage.getItem('sg-settings');return s?JSON.parse(s):{giphy:{key:P.giphy.dk,on:true},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}catch(e){return{giphy:{key:P.giphy.dk,on:true},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}}
+function saveS(){try{localStorage.setItem('sg-settings',JSON.stringify(settings))}catch(e){}}
+function pk(id){return settings[id]?.key||P[id]?.dk||''}
+function pon(id){return settings[id]?.on!==false}
+function eprov(){return Object.keys(P).filter(pon)}
+function saveDeck(){try{localStorage.setItem('sg-deck',JSON.stringify(S.deck))}catch(e){}}
+function loadDeck(){try{const d=localStorage.getItem('sg-deck');if(d)S.deck=JSON.parse(d)}catch(e){}}
+function sendCmd(c){try{localStorage.setItem('sg-cmd',JSON.stringify({...c,ts:Date.now()}))}catch(e){}}
+function readCmd(){try{const c=localStorage.getItem('sg-cmd');return c?JSON.parse(c):null}catch(e){return null}}
+function startPoll(){stopPoll();S.poll=setInterval(()=>{const c=readCmd();if(!c||c.ts===S.lastCmd?.ts)return;S.lastCmd=c;if(c.action==='show'&&c.gid){const g=S.deck.find(x=>x.id===c.gid);if(g)fsShow(g.b64||g.url)}else if(c.action==='clear')fsHide()},POLL)}
+function stopPoll(){if(S.poll){clearInterval(S.poll);S.poll=null}}
+function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
+function fsShow(s){$('fsImg').src=s;$('fs').classList.add('on')}
+function fsHide(){$('fs').classList.remove('on');$('fsImg').src=''}
+function $(id){return document.getElementById(id)}
+function showM(h){$('mbox').innerHTML=h;$('mbg').classList.add('show')}
+function hideM(){$('mbg').classList.remove('show')}
 
-function getProviderKey(id) { return settings[id]?.key || PROVIDERS[id]?.defaultKey || ''; }
-function isProviderEnabled(id) { return settings[id]?.enabled !== false; }
-function enabledProviders() { return Object.keys(PROVIDERS).filter(isProviderEnabled); }
-
-// === PERSISTENCE ===
-function saveDeck() { try { localStorage.setItem('gif-deck', JSON.stringify(state.deck)); } catch(e) {} }
-function loadDeck() { try { const d = localStorage.getItem('gif-deck'); if (d) state.deck = JSON.parse(d); } catch(e) {} }
-
-// === REMOTE CONTROL ===
-function sendCmd(cmd) { try { localStorage.setItem('gif-remote-cmd', JSON.stringify({...cmd, ts: Date.now()})); } catch(e) {} }
-function readCmd() { try { const c = localStorage.getItem('gif-remote-cmd'); return c ? JSON.parse(c) : null; } catch(e) { return null; } }
-function startPolling() { stopPolling(); state.pollTimer = setInterval(() => { const cmd = readCmd(); if (!cmd || cmd.ts === state.lastCmd?.ts) return; state.lastCmd = cmd; if (cmd.action === 'show' && cmd.gifId) { const gif = state.deck.find(g => g.id === cmd.gifId); if (gif) showFullscreen(gif.base64 || gif.url); } else if (cmd.action === 'clear') { hideFullscreen(); } }, POLL_MS); }
-function stopPolling() { if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; } }
-
-function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
-function showFullscreen(src) { document.getElementById('fullscreenImg').src = src; document.getElementById('fullscreen').classList.add('visible'); }
-function hideFullscreen() { document.getElementById('fullscreen').classList.remove('visible'); document.getElementById('fullscreenImg').src = ''; }
-
-// === SEARCH ===
-let searchTimeout;
-async function doSearch(q) {
-  if (!q.trim()) { state.searchResults = []; render(); return; }
-  state.searching = true; render();
-  try {
-    const pid = state.activeProvider;
-    if (pid === 'all') {
-      const promises = enabledProviders().map(id => {
-        const key = getProviderKey(id);
-        return PROVIDERS[id].search(q, key).catch(() => []);
-      });
-      const results = await Promise.all(promises);
-      state.searchResults = results.flat().sort(() => Math.random() - 0.5).slice(0, 30);
-    } else {
-      const key = getProviderKey(pid);
-      state.searchResults = await PROVIDERS[pid].search(q, key);
-    }
-  } catch(e) { state.searchResults = []; toast('Search failed'); }
-  state.searching = false; render();
+let sTimer;
+async function doSearch(q){
+  if(!q.trim()){S.results=[];render();return}
+  S.busy=true;render();
+  try{
+    if(S.prov==='all'){const rs=await Promise.all(eprov().map(id=>P[id].search(q,pk(id)).catch(()=>[])));S.results=rs.flat().sort(()=>Math.random()-.5).slice(0,24)}
+    else{S.results=await P[S.prov].search(q,pk(S.prov))}
+  }catch(e){S.results=[];toast('Search failed')}
+  S.busy=false;render();
 }
 
-// === ADD GIF ===
-async function addToDeck(gif, category = 'custom') {
-  if (state.deck.find(g => g.id === gif.id)) { toast('Already in deck'); return; }
-  toast('Caching GIF...');
-  let base64 = '';
-  try {
-    const r = await fetch(gif.url);
-    const blob = await r.blob();
-    base64 = await new Promise((res, rej) => { const reader = new FileReader(); reader.onload = () => res(reader.result); reader.onerror = rej; reader.readAsDataURL(blob); });
-  } catch(e) { base64 = ''; toast('Cache failed, using URL'); }
-  state.deck.push({ id: gif.id, base64, url: gif.url, label: gif.title?.split(' ').slice(0,3).join(' ') || 'GIF', category, width: gif.width, height: gif.height, provider: gif.provider || 'url' });
-  saveDeck(); toast('Added to deck'); render();
+async function addGif(gif,cat='custom'){
+  if(S.deck.find(g=>g.id===gif.id)){toast('Already in deck');return}
+  toast('Caching...');
+  let b64='';
+  try{const r=await fetch(gif.url);const b=await r.blob();b64=await new Promise((y,n)=>{const rd=new FileReader();rd.onload=()=>y(rd.result);rd.onerror=n;rd.readAsDataURL(b)})}catch(e){b64=''}
+  S.deck.push({id:gif.id,b64,url:gif.url,label:gif.title?.split(' ').slice(0,3).join(' ')||'GIF',cat,w:gif.w,h:gif.h,prov:gif.prov||'url'});
+  saveDeck();toast('Added!');render();
 }
 
-async function addFromUrl(url) {
-  if (!url.trim()) return;
-  const id = 'url-' + Date.now();
-  const gif = { id, url: url.trim(), preview: url.trim(), width: 480, height: 270, title: 'Custom GIF', provider: 'url' };
-  showAddModal(gif);
-}
-
-function removeFromDeck(id) { state.deck = state.deck.filter(g => g.id !== id); saveDeck(); render(); }
-
-// === MODALS ===
-function showModal(html) { document.getElementById('modal').innerHTML = html; document.getElementById('modalOverlay').classList.add('show'); }
-function hideModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-
-function showAddModal(gif) {
-  let selectedCat = 'custom';
-  const cats = CATEGORIES.filter(c => c !== 'all');
-  showModal(`
-    <div class="modal-title">Add to Deck</div>
-    <div style="border-radius:8px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/10;background:var(--surface2)"><img src="${gif.preview||gif.url}" style="width:100%;height:100%;object-fit:cover" alt=""></div>
-    <input class="modal-input" id="gifLabel" placeholder="Label" value="${(gif.title||'').split(' ').slice(0,3).join(' ')}">
-    <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">CATEGORY</div>
-    <div class="cat-select" id="catSelect">${cats.map(c=>`<div class="cat-opt ${c===selectedCat?'selected':''}" data-cat="${c}">${c}</div>`).join('')}</div>
-    <div class="modal-actions"><button class="modal-btn cancel" onclick="hideModal()">Cancel</button><button class="modal-btn confirm" id="modalConfirm">Add</button></div>
+function addModal(gif){
+  let sc='custom';const cs=CATS.filter(c=>c!=='all');
+  showM(`
+    <div class="m-title">ADD TO DECK</div>
+    <div style="border-radius:var(--r-sm);overflow:hidden;margin-bottom:14px;aspect-ratio:16/10;background:var(--card2)"><img src="${gif.preview||gif.url}" style="width:100%;height:100%;object-fit:cover" alt=""></div>
+    <input class="m-input" id="gLabel" placeholder="Label" value="${(gif.title||'').split(' ').slice(0,3).join(' ')}">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">CATEGORY</div>
+    <div class="cat-pick" id="cpick">${cs.map(c=>`<div class="cp ${c===sc?'sel':''}" data-c="${c}">${c}</div>`).join('')}</div>
+    <div class="m-actions"><button class="m-btn cancel" onclick="hideM()">Cancel</button><button class="m-btn go" id="mGo">Add</button></div>
   `);
-  document.getElementById('catSelect').querySelectorAll('.cat-opt').forEach(el => {
-    el.onclick = () => { selectedCat = el.dataset.cat; document.querySelectorAll('#catSelect .cat-opt').forEach(e => e.classList.toggle('selected', e.dataset.cat === selectedCat)); };
-  });
-  document.getElementById('modalConfirm').onclick = () => { gif.title = document.getElementById('gifLabel').value || gif.title; hideModal(); addToDeck(gif, selectedCat); };
+  $('cpick').querySelectorAll('.cp').forEach(el=>{el.onclick=()=>{sc=el.dataset.c;document.querySelectorAll('#cpick .cp').forEach(e=>e.classList.toggle('sel',e.dataset.c===sc))}});
+  $('mGo').onclick=()=>{gif.title=$('gLabel').value||gif.title;hideM();addGif(gif,sc)};
 }
 
-function showSettings() {
-  const providerRows = Object.entries(PROVIDERS).map(([id, p]) => `
-    <div class="settings-row">
-      <span class="provider-name">${p.name}</span>
-      <div class="settings-toggle ${settings[id]?.enabled !== false ? 'on' : ''}" data-provider="${id}" onclick="toggleProvider('${id}', this)"></div>
-      <input class="settings-key-input" data-key="${id}" placeholder="${p.defaultKey ? 'Using default key' : 'API key required'}" value="${settings[id]?.key || ''}">
-    </div>
-  `).join('');
-  showModal(`
-    <div class="modal-title">Settings</div>
-    <div class="settings-group">
-      <div class="settings-label">GIF PROVIDERS</div>
-      ${providerRows}
-      <div class="settings-hint">Giphy: get a key at developers.giphy.com<br>Imgur: get a Client-ID at api.imgur.com<br>Gfycat: public API, no key needed</div>
-    </div>
-    <div class="settings-group">
-      <div class="settings-label">DECK</div>
-      <div style="display:flex;gap:8px">
-        <button class="tool-btn" onclick="exportDeck();hideModal()">&#x2B07; Export JSON</button>
-        <button class="tool-btn" onclick="importDeck();hideModal()">&#x2B06; Import JSON</button>
-      </div>
-      <div class="settings-hint" style="margin-top:8px">Export for AirDrop transfer or backup. Import to restore.</div>
-    </div>
-    <div class="settings-group">
-      <div class="settings-label">DANGER ZONE</div>
-      <button class="tool-btn" style="color:var(--red);border:1px solid var(--red)" onclick="if(confirm('Clear entire deck?')){state.deck=[];saveDeck();render();hideModal();toast('Deck cleared')}">&#x1F5D1; Clear Deck</button>
-    </div>
-    <div class="modal-actions"><button class="modal-btn confirm" onclick="saveProviderKeys();hideModal()">Done</button></div>
-  `);
+function rmGif(id){S.deck=S.deck.filter(g=>g.id!==id);saveDeck();render()}
+
+function cycleProvider(){
+  const all=['all',...eprov()];
+  const i=all.indexOf(S.prov);
+  S.prov=all[(i+1)%all.length];
+  render();
 }
 
-function toggleProvider(id, el) {
-  settings[id] = settings[id] || {};
-  settings[id].enabled = !settings[id].enabled;
-  el.classList.toggle('on');
-  saveSettings(settings);
-}
-
-function saveProviderKeys() {
-  document.querySelectorAll('.settings-key-input').forEach(input => {
-    const id = input.dataset.key;
-    settings[id] = settings[id] || {};
-    settings[id].key = input.value.trim();
-  });
-  saveSettings(settings);
-  toast('Settings saved');
-}
-
-function exportDeck() {
-  const blob = new Blob([JSON.stringify(state.deck, null, 2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gif-deck-${Date.now()}.json`; a.click(); toast('Exported');
-}
-function importDeck() {
-  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-  input.onchange = async (e) => { try { const d = JSON.parse(await e.target.files[0].text()); if (!Array.isArray(d)) throw 0; state.deck = d; saveDeck(); render(); toast(`Imported ${d.length} GIFs`); } catch(e) { toast('Import failed'); } };
-  input.click();
-}
+function exportDeck(){const b=new Blob([JSON.stringify(S.deck,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`sneakergif-${Date.now()}.json`;a.click();toast('Exported')}
+function importDeck(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d))throw 0;S.deck=d;saveDeck();render();toast(`${d.length} GIFs loaded`)}catch(e){toast('Failed')}};i.click()}
 
 // === RENDER ===
-function render() {
-  const main = document.getElementById('mainContent');
-  const toolbar = document.getElementById('toolbar');
-  document.getElementById('statusText').textContent = `DECK: ${state.deck.length} GIFS`;
-  document.getElementById('modeLabel').textContent = `${state.mode.toUpperCase()} MODE`;
-  document.querySelectorAll('.mode-pill').forEach(el => {
-    el.classList.remove('active','remote-active');
-    if (el.dataset.mode === state.mode) el.classList.add(state.mode === 'ctrl' || state.mode === 'show' ? 'remote-active' : 'active');
-  });
-  if (state.mode === 'show') startPolling(); else stopPolling();
-  ({prep: renderPrep, live: renderLive, show: renderShow, ctrl: renderCtrl})[state.mode](main, toolbar);
+function render(){
+  const m=$('main');
+  document.querySelectorAll('.nav-item').forEach(el=>{el.classList.toggle('active',el.dataset.m===S.mode)});
+  if(S.mode==='show')startPoll();else stopPoll();
+  ({prep:rPrep,live:rLive,show:rShow,ctrl:rCtrl})[S.mode](m);
 }
 
-function renderPrep(main, toolbar) {
-  const ep = enabledProviders();
-  const providerOpts = [`<option value="all">ALL</option>`, ...ep.map(id => `<option value="${id}" ${state.activeProvider===id?'selected':''}>${PROVIDERS[id].name.toUpperCase()}</option>`)].join('');
-  const filtered = state.activeCat === 'all' ? state.deck : state.deck.filter(g => g.category === state.activeCat);
-  main.innerHTML = `
-    <div class="search-wrap">
-      <span class="search-icon">&#x1F50D;</span>
-      <input class="search-input" id="searchInput" type="text" placeholder="Search GIFs..." autocomplete="off" autocapitalize="off">
-      <select class="provider-select" id="providerSelect">${providerOpts}</select>
+function rPrep(m){
+  const f=S.cat==='all'?S.deck:S.deck.filter(g=>g.cat===S.cat);
+  const pName=S.prov==='all'?'ALL':P[S.prov]?.name.toUpperCase()||S.prov;
+  m.innerHTML=`
+    <div class="search-bar">
+      <div class="search-field"><span class="s-icon">&#x1F50D;</span><input id="si" type="text" placeholder="Search GIFs..." autocomplete="off" autocapitalize="off"></div>
+      <button class="prov-btn" onclick="cycleProvider();render()">${pName}</button>
     </div>
-    <div class="url-input-wrap">
-      <input class="url-input" id="urlInput" type="url" placeholder="Or paste a GIF URL directly...">
-      <button class="url-add-btn" onclick="addFromUrl(document.getElementById('urlInput').value)">+ ADD</button>
-    </div>
-    <div id="searchResults" class="search-results" style="margin-bottom:16px"></div>
-    <div class="cat-tabs">${CATEGORIES.map(c=>`<button class="cat-tab ${c===state.activeCat?'active':''}" data-cat="${c}">${c}</button>`).join('')}</div>
-    ${filtered.length ? `<div class="deck-grid">${filtered.map(g=>`
-      <div class="deck-card fade-in" data-id="${g.id}"><img src="${g.base64||g.url}" alt="${g.label}" loading="lazy"><div class="card-label">${g.label}</div><button class="card-delete" data-del="${g.id}">&times;</button></div>
-    `).join('')}</div>` : `<div class="empty"><div class="empty-icon">&#x1F3AC;</div><div class="empty-title">No GIFs Yet</div><div class="empty-sub">Search above or paste a URL to add GIFs to your deck</div></div>`}
+    <div class="url-bar"><input id="ui" type="url" placeholder="Paste GIF URL..."><button onclick="addFromUrl()">+ ADD</button></div>
+    <div id="sr" class="results"></div>
+    <div class="cats">${CATS.map(c=>`<button class="cat-pill ${c===S.cat?'active':''}" data-c="${c}">${c}</button>`).join('')}</div>
+    ${f.length?`<div class="deck">${f.map(g=>`<div class="deck-item fade-up" data-id="${g.id}"><img src="${g.b64||g.url}" alt="${g.label}" loading="lazy"><div class="d-label">${g.label}</div><button class="d-del" data-d="${g.id}">&times;</button></div>`).join('')}</div>`:`<div class="empty"><div class="empty-icon">&#x1F3AC;</div><div class="empty-title">NO GIFS YET</div><div class="empty-sub">Search above or paste a URL to start building your deck</div></div>`}
   `;
-  toolbar.innerHTML = `<button class="tool-btn" onclick="showSettings()">&#x2699; Settings</button><button class="tool-btn primary" onclick="document.getElementById('searchInput').focus()">&#x1F50D; Search</button>`;
-  document.getElementById('searchInput').addEventListener('input', e => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => doSearch(e.target.value), 400); });
-  document.getElementById('providerSelect').addEventListener('change', e => { state.activeProvider = e.target.value; });
-  main.querySelectorAll('.cat-tab').forEach(el => { el.onclick = () => { state.activeCat = el.dataset.cat; render(); }; });
-  main.querySelectorAll('.deck-card').forEach(el => {
-    el.onclick = e => { if (e.target.closest('.card-delete')) { removeFromDeck(e.target.closest('.card-delete').dataset.del); return; } const gif = state.deck.find(g => g.id === el.dataset.id); if (gif) showFullscreen(gif.base64 || gif.url); };
-  });
-  renderSearchResults();
+  $('si').addEventListener('input',e=>{clearTimeout(sTimer);sTimer=setTimeout(()=>doSearch(e.target.value),400)});
+  m.querySelectorAll('.cat-pill').forEach(el=>{el.onclick=()=>{S.cat=el.dataset.c;render()}});
+  m.querySelectorAll('.deck-item').forEach(el=>{el.onclick=e=>{if(e.target.closest('.d-del')){rmGif(e.target.closest('.d-del').dataset.d);return}const g=S.deck.find(x=>x.id===el.dataset.id);if(g)fsShow(g.b64||g.url)}});
+  rResults();
 }
 
-function renderSearchResults() {
-  const c = document.getElementById('searchResults'); if (!c) return;
-  if (state.searching) { c.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-family:var(--font-mono);font-size:11px;letter-spacing:.08em">SEARCHING...</div>'; return; }
-  c.innerHTML = state.searchResults.map(g => `
-    <div class="search-result" data-gid="${g.id}"><img src="${g.preview}" alt="${g.title}" loading="lazy"><div class="add-badge">+</div><div class="provider-badge">${g.provider||''}</div></div>
-  `).join('');
-  c.querySelectorAll('.search-result').forEach(el => { el.onclick = () => { const gif = state.searchResults.find(g => g.id === el.dataset.gid); if (gif) showAddModal(gif); }; });
+function rResults(){
+  const c=document.getElementById('sr');if(!c)return;
+  if(S.busy){c.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:11px;font-weight:600;letter-spacing:.1em">SEARCHING...</div>';return}
+  c.innerHTML=S.results.map(g=>`<div class="result-card" data-g="${g.id}"><img src="${g.preview}" alt="${g.title}" loading="lazy"><div class="r-badge">${g.prov}</div><div class="r-add">+</div></div>`).join('');
+  c.querySelectorAll('.result-card').forEach(el=>{el.onclick=()=>{const g=S.results.find(x=>x.id===el.dataset.g);if(g)addModal(g)}});
 }
 
-function renderLive(main, toolbar) {
-  const filtered = state.activeCat === 'all' ? state.deck : state.deck.filter(g => g.category === state.activeCat);
-  main.innerHTML = `<div class="cat-tabs">${CATEGORIES.map(c=>`<button class="cat-tab ${c===state.activeCat?'active':''}" data-cat="${c}">${c}</button>`).join('')}</div>
-    ${filtered.length ? `<div class="deck-grid">${filtered.map(g=>`<div class="deck-card fade-in" data-id="${g.id}"><img src="${g.base64||g.url}" alt="${g.label}" loading="lazy"><div class="card-label">${g.label}</div></div>`).join('')}</div>` : `<div class="empty"><div class="empty-icon">&#x1F4AD;</div><div class="empty-title">Deck Empty</div><div class="empty-sub">Switch to PREP to add GIFs</div></div>`}`;
-  toolbar.innerHTML = '';
-  main.querySelectorAll('.cat-tab').forEach(el => { el.onclick = () => { state.activeCat = el.dataset.cat; render(); }; });
-  main.querySelectorAll('.deck-card').forEach(el => { el.onclick = () => { const gif = state.deck.find(g => g.id === el.dataset.id); if (gif) showFullscreen(gif.base64 || gif.url); }; });
+function rLive(m){
+  const f=S.cat==='all'?S.deck:S.deck.filter(g=>g.cat===S.cat);
+  m.innerHTML=`<div class="cats">${CATS.map(c=>`<button class="cat-pill ${c===S.cat?'active':''}" data-c="${c}">${c}</button>`).join('')}</div>
+    ${f.length?`<div class="deck">${f.map(g=>`<div class="deck-item fade-up" data-id="${g.id}"><img src="${g.b64||g.url}" alt="${g.label}" loading="lazy"><div class="d-label">${g.label}</div></div>`).join('')}</div>`:`<div class="empty"><div class="empty-icon">&#x26A1;</div><div class="empty-title">DECK EMPTY</div><div class="empty-sub">Switch to Prep to add GIFs</div></div>`}`;
+  m.querySelectorAll('.cat-pill').forEach(el=>{el.onclick=()=>{S.cat=el.dataset.c;render()}});
+  m.querySelectorAll('.deck-item').forEach(el=>{el.onclick=()=>{const g=S.deck.find(x=>x.id===el.dataset.id);if(g)fsShow(g.b64||g.url)}});
 }
 
-function renderShow(main, toolbar) {
-  main.innerHTML = `<div class="empty"><div class="empty-icon">&#x1F4FA;</div><div class="empty-title">Display Mode</div><div class="empty-sub">Waiting for commands from CTRL device...<br><br><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--remote)">POLLING EVERY ${POLL_MS}MS</span></div></div>`;
-  toolbar.innerHTML = `<button class="tool-btn" onclick="sendCmd({action:'test',ts:Date.now()});toast('Test sent')">&#x1F4E1; Test</button>`;
+function rShow(m){
+  m.innerHTML=`<div class="show-wait"><div class="show-pulse">&#x1F4FA;</div><div style="font-family:var(--head);font-size:32px;letter-spacing:1px;margin-bottom:12px">DISPLAY MODE</div><div class="show-status">Waiting for CTRL commands...</div><div style="margin-top:24px"><button class="m-btn go" onclick="sendCmd({action:'test'});toast('Test sent')">&#x1F4E1; Test Connection</button></div></div>`;
 }
 
-function renderCtrl(main, toolbar) {
-  const filtered = state.activeCat === 'all' ? state.deck : state.deck.filter(g => g.category === state.activeCat);
-  main.innerHTML = `<div class="cat-tabs">${CATEGORIES.map(c=>`<button class="cat-tab ${c===state.activeCat?'active':''}" data-cat="${c}">${c}</button>`).join('')}</div>
-    ${filtered.length ? `<div class="ctrl-grid">${filtered.map(g=>`<div class="ctrl-card fade-in" data-id="${g.id}"><img src="${g.base64||g.url}" alt="${g.label}" loading="lazy"><div class="card-label">${g.label}</div></div>`).join('')}</div>` : `<div class="empty"><div class="empty-icon">&#x1F3AE;</div><div class="empty-title">No GIFs</div><div class="empty-sub">Add GIFs in PREP mode first</div></div>`}`;
-  toolbar.innerHTML = '';
-  main.insertAdjacentHTML('beforeend', '<button class="ctrl-clear" id="ctrlClear">&#x2716; CLEAR DISPLAY</button>');
-  main.querySelectorAll('.cat-tab').forEach(el => { el.onclick = () => { state.activeCat = el.dataset.cat; render(); }; });
-  main.querySelectorAll('.ctrl-card').forEach(el => { el.onclick = () => { sendCmd({action:'show', gifId: el.dataset.id}); el.classList.add('sent'); setTimeout(() => el.classList.remove('sent'), 800); toast('Sent'); }; });
-  document.getElementById('ctrlClear').onclick = () => { sendCmd({action:'clear'}); toast('Cleared'); };
+function rCtrl(m){
+  const f=S.cat==='all'?S.deck:S.deck.filter(g=>g.cat===S.cat);
+  m.innerHTML=`<div class="cats">${CATS.map(c=>`<button class="cat-pill ${c===S.cat?'active':''}" data-c="${c}">${c}</button>`).join('')}</div>
+    ${f.length?`<div class="ctrl">${f.map(g=>`<div class="ctrl-item fade-up" data-id="${g.id}"><img src="${g.b64||g.url}" alt="${g.label}" loading="lazy"><div class="d-label">${g.label}</div></div>`).join('')}</div>`:`<div class="empty"><div class="empty-icon">&#x1F3AE;</div><div class="empty-title">NO GIFS</div><div class="empty-sub">Add GIFs in Prep first</div></div>`}`;
+  m.insertAdjacentHTML('beforeend','<button class="clear-btn" id="clr">&#x2716; CLEAR</button>');
+  m.querySelectorAll('.cat-pill').forEach(el=>{el.onclick=()=>{S.cat=el.dataset.c;render()}});
+  m.querySelectorAll('.ctrl-item').forEach(el=>{el.onclick=()=>{sendCmd({action:'show',gid:el.dataset.id});el.classList.add('sent');setTimeout(()=>el.classList.remove('sent'),600);toast('Sent!')}});
+  $('clr').onclick=()=>{sendCmd({action:'clear'});toast('Cleared')};
+}
+
+function addFromUrl(){const u=$('ui')?.value;if(!u?.trim())return;addModal({id:'url-'+Date.now(),url:u.trim(),preview:u.trim(),w:480,h:270,title:'Custom GIF',prov:'url'})}
+
+// === SETTINGS ===
+function showSettings(){
+  const rows=Object.entries(P).map(([id,p])=>`<div class="s-row"><span class="s-name">${p.name}</span><div class="s-toggle ${settings[id]?.on!==false?'on':''}" data-p="${id}"></div><input class="s-key" data-k="${id}" placeholder="${p.dk?'Default key':'API key'}" value="${settings[id]?.key||''}"></div>`).join('');
+  showM(`
+    <div class="m-title">SETTINGS</div>
+    <div class="s-group"><div class="s-label">GIF PROVIDERS</div>${rows}<div class="s-hint">Tap the toggle to enable/disable. Enter your API key or leave blank for defaults.</div></div>
+    <div class="s-group"><div class="s-label">DECK</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="m-btn cancel" onclick="exportDeck();hideM()">&#x2B07; Export</button><button class="m-btn cancel" onclick="importDeck();hideM()">&#x2B06; Import</button><button class="m-btn cancel" style="color:var(--coral);border-color:var(--coral)" onclick="if(confirm('Clear entire deck?')){S.deck=[];saveDeck();render();hideM();toast('Cleared')}">&#x1F5D1; Clear</button></div></div>
+    <div class="m-actions"><button class="m-btn go" onclick="saveKeys();hideM()">Done</button></div>
+  `);
+  document.querySelectorAll('.s-toggle').forEach(el=>{el.onclick=()=>{const id=el.dataset.p;settings[id]=settings[id]||{};settings[id].on=!settings[id].on;el.classList.toggle('on');saveS()}});
+}
+function saveKeys(){document.querySelectorAll('.s-key').forEach(i=>{const id=i.dataset.k;settings[id]=settings[id]||{};settings[id].key=i.value.trim()});saveS();toast('Saved')}
+
+// === HELP ===
+function showHelp(){
+  showM(`
+    <div class="m-title">HOW TO USE</div>
+    <div class="h-section"><h3>&#x1F3AF; What is SneakerGif?</h3><p>A GIF soundboard for conferences. Hold up your iPad showing a reaction GIF when someone says something wild. Physical emoji, but animated.</p></div>
+    <div class="h-divider"></div>
+    <div class="h-section"><h3>&#x1F4F1; Two-Device Setup</h3>
+      <ul>
+        <li><strong>iPad</strong> &mdash; the display. Set to <span class="h-badge show">SHOW</span>. Faces the audience.</li>
+        <li><strong>iPhone</strong> &mdash; your remote. Set to <span class="h-badge ctrl">CTRL</span>. You tap, iPad shows.</li>
+        <li><strong>Hotspot</strong> &mdash; iPhone Personal Hotspot on. iPad connects to it.</li>
+      </ul>
+    </div>
+    <div class="h-divider"></div>
+    <div class="h-section"><h3>&#x1F3AC; Four Modes</h3>
+      <ul>
+        <li><span class="h-badge prep">PREP</span> Search &amp; cache GIFs. Do this on WiFi before the event.</li>
+        <li><span class="h-badge live">LIVE</span> Solo mode. Tap any GIF &rarr; fullscreen. One device.</li>
+        <li><span class="h-badge show">SHOW</span> iPad display. Waits for CTRL commands.</li>
+        <li><span class="h-badge ctrl">CTRL</span> iPhone remote. Tap to send. Bottom button clears.</li>
+      </ul>
+    </div>
+    <div class="h-divider"></div>
+    <div class="h-section"><h3>&#x26A1; Quick Start</h3>
+      <div class="h-step"><div class="h-step-num">1</div><div class="h-step-text">Search &amp; add 10-20 GIFs in <span class="h-badge prep">PREP</span></div></div>
+      <div class="h-step"><div class="h-step-num">2</div><div class="h-step-text">Tap <strong>Settings &rarr; Export</strong>. AirDrop the JSON to iPad.</div></div>
+      <div class="h-step"><div class="h-step-num">3</div><div class="h-step-text">On iPad: open SneakerGif, <strong>Settings &rarr; Import</strong> the JSON.</div></div>
+      <div class="h-step"><div class="h-step-num">4</div><div class="h-step-text">iPad &rarr; <span class="h-badge show">SHOW</span> mode. iPhone &rarr; <span class="h-badge ctrl">CTRL</span> mode.</div></div>
+      <div class="h-step"><div class="h-step-num">5</div><div class="h-step-text">Tap a GIF on iPhone. It appears on iPad. &#x1F389;</div></div>
+    </div>
+    <div class="h-divider"></div>
+    <div class="h-section"><h3>&#x1F511; Getting API Keys</h3>
+    <p style="margin-bottom:14px">API keys give you more search results and higher rate limits. SneakerGif works without them (Giphy has a built-in key, Gfycat needs none), but for the best experience:</p>
+
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--head);font-size:18px;letter-spacing:1px;margin-bottom:8px">GIPHY</div>
+      <div class="h-step"><div class="h-step-num">1</div><div class="h-step-text">Go to <strong>developers.giphy.com</strong></div></div>
+      <div class="h-step"><div class="h-step-num">2</div><div class="h-step-text">Click <strong>Create an Account</strong> (or log in)</div></div>
+      <div class="h-step"><div class="h-step-num">3</div><div class="h-step-text">Click <strong>Create an App</strong> &rarr; select <strong>API</strong> (not SDK)</div></div>
+      <div class="h-step"><div class="h-step-num">4</div><div class="h-step-text">Name it anything (e.g. "SneakerGif"). Accept terms.</div></div>
+      <div class="h-step"><div class="h-step-num">5</div><div class="h-step-text">Copy the <strong>API Key</strong>. Paste into Settings &rarr; Giphy field.</div></div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--head);font-size:18px;letter-spacing:1px;margin-bottom:8px">IMGUR</div>
+      <div class="h-step"><div class="h-step-num">1</div><div class="h-step-text">Go to <strong>api.imgur.com/oauth2/addclient</strong></div></div>
+      <div class="h-step"><div class="h-step-num">2</div><div class="h-step-text">Sign in or create an Imgur account</div></div>
+      <div class="h-step"><div class="h-step-num">3</div><div class="h-step-text">Application name: <code>SneakerGif</code></div></div>
+      <div class="h-step"><div class="h-step-num">4</div><div class="h-step-text">Authorization type: <strong>Anonymous usage without user authorization</strong></div></div>
+      <div class="h-step"><div class="h-step-num">5</div><div class="h-step-text">Callback URL: <code>https://example.com</code> (anything works)</div></div>
+      <div class="h-step"><div class="h-step-num">6</div><div class="h-step-text">Copy the <strong>Client ID</strong>. Paste into Settings &rarr; Imgur field.</div></div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--head);font-size:18px;letter-spacing:1px;margin-bottom:8px">GFYCAT</div>
+      <p>No API key needed. Gfycat's search API is public. Just enable it in Settings.</p>
+    </div>
+    </div>
+    <div class="h-divider"></div>
+    <div class="h-section"><h3>&#x1F4BE; Offline &amp; Backup</h3>
+      <ul>
+        <li>GIFs are cached as base64 in your browser. <strong>No network needed to display.</strong></li>
+        <li><strong>Export</strong> saves your deck as JSON. AirDrop between devices.</li>
+        <li><strong>Import</strong> loads a deck. Add to Home Screen for app-like use.</li>
+      </ul>
+    </div>
+    <div class="m-actions"><button class="m-btn go" onclick="hideM()">Got it</button></div>
+  `);
 }
 
 // === EVENTS ===
-document.querySelectorAll('.mode-pill').forEach(el => { el.onclick = () => { state.mode = el.dataset.mode; render(); }; });
-document.getElementById('fullscreenClose').onclick = hideFullscreen;
-document.getElementById('fullscreen').onclick = e => { if (e.target === e.currentTarget) hideFullscreen(); };
-document.getElementById('modalOverlay').onclick = e => { if (e.target === e.currentTarget) hideModal(); };
+document.querySelectorAll('.nav-item').forEach(el=>{el.onclick=()=>{S.mode=el.dataset.m;render()}});
+$('fsX').onclick=fsHide;
+$('fs').onclick=e=>{if(e.target===e.currentTarget)fsHide()};
+$('mbg').onclick=e=>{if(e.target===e.currentTarget)hideM()};
 
-function showHelp() {
-  showModal(`
-    <div class="modal-title">How to Use GIF Reply</div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F3AF;</span> What is this?</h3>
-      <p>A GIF soundboard for conferences. Hold up your iPad showing a reaction GIF in response to something someone says. Think physical emoji, but animated.</p>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F4F1;</span> Two-Device Setup</h3>
-      <ul>
-        <li><strong>iPad mini</strong> &mdash; the display (faces the other person). Set to <span class="help-badge show">SHOW</span> mode.</li>
-        <li><strong>iPhone</strong> &mdash; your remote control. Set to <span class="help-badge ctrl">CTRL</span> mode. Tap a GIF and it appears on the iPad.</li>
-        <li><strong>Hotspot</strong> &mdash; turn on Personal Hotspot on iPhone. Connect iPad to it. This is your local network.</li>
-      </ul>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F3AC;</span> Four Modes</h3>
-      <ul>
-        <li><span class="help-badge prep">PREP</span> &mdash; Search for GIFs, cache them to your deck. Do this on WiFi before the event.</li>
-        <li><span class="help-badge live">LIVE</span> &mdash; Solo use. Tap any GIF to display it fullscreen. One device, no remote.</li>
-        <li><span class="help-badge show">SHOW</span> &mdash; Display mode (iPad). Sits waiting, shows whatever CTRL sends it.</li>
-        <li><span class="help-badge ctrl">CTRL</span> &mdash; Remote control (iPhone). Compact grid. Tap to send, bottom button to clear.</li>
-      </ul>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F50D;</span> Finding GIFs</h3>
-      <ul>
-        <li>In <span class="help-badge prep">PREP</span>, type in the search bar. Results come from your enabled providers.</li>
-        <li>Use the dropdown to search <strong>Giphy</strong>, <strong>Gfycat</strong>, <strong>Imgur</strong>, or <strong>ALL</strong> at once.</li>
-        <li>Or paste any GIF URL directly into the URL field below the search bar.</li>
-        <li>Tap a result to add it &mdash; pick a label and category, then it's cached to your deck as base64.</li>
-      </ul>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F511;</span> API Keys</h3>
-      <ul>
-        <li><strong>Giphy</strong> &mdash; ships with a public beta key. For higher limits, get your own at <em>developers.giphy.com</em>.</li>
-        <li><strong>Gfycat</strong> &mdash; public API, no key needed.</li>
-        <li><strong>Imgur</strong> &mdash; works without a key. For higher rate limits, get a Client-ID at <em>api.imgur.com</em>.</li>
-        <li>Configure keys in <strong>Settings</strong> (gear icon).</li>
-      </ul>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x1F4BE;</span> Offline &amp; Backup</h3>
-      <ul>
-        <li>GIFs are cached as base64 in your browser &mdash; <strong>no network needed to display them</strong>.</li>
-        <li>Use <strong>Export</strong> in settings to save your deck as a JSON file. AirDrop it between devices.</li>
-        <li>Use <strong>Import</strong> to load a deck from a JSON file.</li>
-        <li>Add to Home Screen on iPad/iPhone for a more app-like experience.</li>
-      </ul>
-    </div>
-    <div class="help-divider"></div>
-
-    <div class="help-section">
-      <h3><span class="h-icon">&#x26A1;</span> Quick Start</h3>
-      <p>1. Search &amp; add 10-20 GIFs in <span class="help-badge prep">PREP</span><br>
-      2. Export deck &amp; AirDrop to iPad<br>
-      3. iPad: import deck, switch to <span class="help-badge show">SHOW</span><br>
-      4. iPhone: switch to <span class="help-badge ctrl">CTRL</span><br>
-      5. Tap a GIF on iPhone &rarr; it appears on iPad</p>
-    </div>
-
-    <div class="modal-actions"><button class="modal-btn confirm" onclick="hideModal()">Got it</button></div>
-  `);
-}
-
-// Show help on first visit
-if (!localStorage.getItem('gif-help-seen')) {
-  setTimeout(showHelp, 400);
-  localStorage.setItem('gif-help-seen', '1');
-}
-
-loadDeck(); render();
+if(!localStorage.getItem('sg-seen')){setTimeout(showHelp,300);localStorage.setItem('sg-seen','1')}
+loadDeck();render();
 </script>
 </body>
 </html>
