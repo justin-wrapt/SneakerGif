@@ -365,6 +365,132 @@ function cycleProvider(){
 function exportDeck(){const b=new Blob([JSON.stringify(S.deck,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`sneakergif-${Date.now()}.json`;a.click();toast('Exported')}
 function importDeck(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d))throw 0;S.deck=d;saveDeck();render();toast(`${d.length} GIFs loaded`)}catch(e){toast('Failed')}};i.click()}
 
+function downloadOffline(){
+  if(!S.deck.length){toast('Deck empty — add GIFs first');return}
+  const missing=S.deck.filter(g=>!g.b64);
+  if(missing.length){toast(`${missing.length} GIFs not cached — re-add them`);return}
+  toast('Building offline app...');
+  const deckJSON=JSON.stringify(S.deck).replace(/</g,'\\u003c').replace(/>/g,'\\u003e');
+  const html=`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>SneakerGif Offline</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a0a;--card:#141414;--card2:#1c1c1c;--text:#f0f0f0;--text2:#888;--text3:#555;--neon:#c8ff00;--coral:#ff3366;--blue:#00d4ff;--r:16px;--r-sm:10px;--head:'Bebas Neue',sans-serif;--mono:'IBM Plex Mono',monospace;--safe-b:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--mono);touch-action:manipulation}
+button{font-family:var(--mono);border:none;cursor:pointer;outline:none;background:none;color:inherit}
+.shell{display:flex;flex-direction:column;height:100%}
+.topbar{padding:calc(env(safe-area-inset-top,8px)+4px) 16px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--neon)}
+.brand{font-family:var(--head);font-size:32px;letter-spacing:2px;color:var(--neon)}
+.offline-badge{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:4px;background:var(--coral);color:#fff}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px calc(80px + var(--safe-b))}
+.cats{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat-pill{padding:10px 18px;border-radius:30px;white-space:nowrap;flex-shrink:0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:var(--card);color:var(--text3);border:2px solid #333}
+.cat-pill.active{border-color:var(--neon);color:var(--neon);background:rgba(200,255,0,.08)}
+.deck{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.deck-item{border-radius:var(--r-sm);overflow:hidden;position:relative;aspect-ratio:4/3;background:var(--card);border:2px solid #222}
+.deck-item:active{transform:scale(.96);border-color:var(--neon)}
+.deck-item img{width:100%;height:100%;object-fit:cover}
+.deck-item .d-label{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(transparent,rgba(0,0,0,.85));color:var(--text2)}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:2px solid #222;padding:6px 8px calc(var(--safe-b)+6px)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:var(--r-sm);position:relative}
+.nav-item .nav-icon{font-size:22px}
+.nav-item .nav-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.nav-item.active .nav-label{color:var(--neon)}
+.nav-item.active::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:30px;height:3px;border-radius:2px;background:var(--neon)}
+.nav-item.remote.active .nav-label{color:var(--blue)}
+.nav-item.remote.active::before{background:var(--blue)}
+.ctrl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ctrl-item{border-radius:var(--r-sm);overflow:hidden;position:relative;aspect-ratio:4/3;background:var(--card);border:3px solid transparent}
+.ctrl-item:active{transform:scale(.93);border-color:var(--blue)}
+.ctrl-item.sent{border-color:var(--blue);box-shadow:0 0 20px rgba(0,212,255,.25)}
+.ctrl-item img{width:100%;height:100%;object-fit:cover}
+.clear-btn{position:fixed;bottom:calc(80px+var(--safe-b)+12px);left:50%;transform:translateX(-50%);padding:16px 48px;border-radius:40px;background:var(--coral);color:#fff;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 4px 24px rgba(255,51,102,.35);z-index:40}
+.fs{position:fixed;inset:0;z-index:200;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.fs.on{opacity:1;pointer-events:auto}
+.fs img{max-width:100%;max-height:100%;object-fit:contain}
+.fs-x{position:absolute;top:calc(env(safe-area-inset-top,12px)+8px);right:12px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,12px)+56px);left:50%;transform:translateX(-50%) translateY(-16px);padding:12px 24px;border-radius:30px;font-size:12px;font-weight:600;background:var(--neon);color:#000;z-index:300;opacity:0;pointer-events:none;transition:all .3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.show-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;text-align:center}
+.show-pulse{width:80px;height:80px;border-radius:50%;border:3px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:36px;animation:ring 2s ease infinite;margin-bottom:20px}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.3)}50%{box-shadow:0 0 0 20px rgba(0,212,255,0)}}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.empty-icon{font-size:52px;margin-bottom:16px}
+.empty-title{font-family:var(--head);font-size:28px;letter-spacing:1px;margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--text3);line-height:1.6;max-width:280px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><div class="brand">SNEAKERGIF</div><div class="offline-badge">OFFLINE</div></div>
+  <div class="content" id="main"></div>
+  <nav class="nav">
+    <button class="nav-item active" data-m="live"><span class="nav-icon">&#x26A1;</span><span class="nav-label">Live</span></button>
+    <button class="nav-item remote" data-m="show"><span class="nav-icon">&#x1F4FA;</span><span class="nav-label">Show</span></button>
+    <button class="nav-item remote" data-m="ctrl"><span class="nav-icon">&#x1F3AE;</span><span class="nav-label">Ctrl</span></button>
+  </nav>
+</div>
+<div class="fs" id="fs"><img id="fsImg" src="" alt=""><button class="fs-x" id="fsX">&times;</button></div>
+<div class="toast" id="toast"></div>
+<`+`script>
+const CATS=${JSON.stringify(CATS)};
+const BAKED=${deckJSON};
+let deck=JSON.parse(localStorage.getItem('sg-offline-deck')||'null')||BAKED;
+function saveDeck(){try{localStorage.setItem('sg-offline-deck',JSON.stringify(deck))}catch(e){}}
+saveDeck();
+let mode='live',cat='all',lastCmd=null,poll=null;
+function $(id){return document.getElementById(id)}
+function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
+function fsShow(s){$('fsImg').src=s;$('fs').classList.add('on')}
+function fsHide(){$('fs').classList.remove('on');$('fsImg').src=''}
+function sendCmd(c){try{localStorage.setItem('sg-cmd',JSON.stringify({...c,ts:Date.now()}))}catch(e){}}
+function readCmd(){try{const c=localStorage.getItem('sg-cmd');return c?JSON.parse(c):null}catch(e){return null}}
+function startPoll(){stopPoll();poll=setInterval(()=>{const c=readCmd();if(!c||c.ts===lastCmd?.ts)return;lastCmd=c;if(c.action==='show'&&c.gid){const g=deck.find(x=>x.id===c.gid);if(g)fsShow(g.b64||g.url)}else if(c.action==='clear')fsHide()},600)}
+function stopPoll(){if(poll){clearInterval(poll);poll=null}}
+function render(){
+  const m=$('main');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.m===mode));
+  if(mode==='show')startPoll();else stopPoll();
+  const f=cat==='all'?deck:deck.filter(g=>g.cat===cat);
+  const catHTML='<div class="cats">'+CATS.map(c=>'<button class="cat-pill '+(c===cat?'active':'')+'" data-c="'+c+'">'+c+'</button>').join('')+'</div>';
+  if(mode==='live'){
+    m.innerHTML=catHTML+(f.length?'<div class="deck">'+f.map(g=>'<div class="deck-item" data-id="'+g.id+'"><img src="'+(g.b64||g.url)+'" alt="'+g.label+'"><div class="d-label">'+g.label+'</div></div>').join('')+'</div>':'<div class="empty"><div class="empty-icon">&#x26A1;</div><div class="empty-title">DECK EMPTY</div></div>');
+    m.querySelectorAll('.deck-item').forEach(el=>{el.onclick=()=>{const g=deck.find(x=>x.id===el.dataset.id);if(g)fsShow(g.b64||g.url)}});
+  }else if(mode==='show'){
+    m.innerHTML='<div class="show-wait"><div class="show-pulse">&#x1F4FA;</div><div style="font-family:var(--head);font-size:32px;letter-spacing:1px;margin-bottom:12px">DISPLAY MODE</div><div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">Waiting for CTRL...</div></div>';
+  }else if(mode==='ctrl'){
+    m.innerHTML=catHTML+(f.length?'<div class="ctrl">'+f.map(g=>'<div class="ctrl-item" data-id="'+g.id+'"><img src="'+(g.b64||g.url)+'" alt="'+g.label+'"><div class="d-label">'+g.label+'</div></div>').join('')+'</div>':'<div class="empty"><div class="empty-icon">&#x1F3AE;</div><div class="empty-title">NO GIFS</div></div>');
+    m.insertAdjacentHTML('beforeend','<button class="clear-btn" id="clr">&#x2716; CLEAR</button>');
+    m.querySelectorAll('.ctrl-item').forEach(el=>{el.onclick=()=>{sendCmd({action:'show',gid:el.dataset.id});el.classList.add('sent');setTimeout(()=>el.classList.remove('sent'),600);toast('Sent!')}});
+    $('clr').onclick=()=>{sendCmd({action:'clear'});toast('Cleared')};
+  }
+  m.querySelectorAll('.cat-pill').forEach(el=>{el.onclick=()=>{cat=el.dataset.c;render()}});
+}
+document.querySelectorAll('.nav-item').forEach(el=>{el.onclick=()=>{mode=el.dataset.m;render()}});
+$('fsX').onclick=fsHide;
+$('fs').onclick=e=>{if(e.target===e.currentTarget)fsHide()};
+render();
+toast(deck.length+' GIFs loaded offline');
+<`+`/script>
+</body>
+</html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='sneakergif-offline.html';
+  a.click();
+  toast('Offline app downloaded!');
+}
+
 // === RENDER ===
 function render(){
   const m=$('main');
@@ -429,7 +555,8 @@ function showSettings(){
   showM(`
     <div class="m-title">SETTINGS</div>
     <div class="s-group"><div class="s-label">GIF PROVIDERS</div>${rows}<div class="s-hint">Giphy requires your own key (free at developers.giphy.com). Imgur works without a key but a Client-ID gives higher limits.</div></div>
-    <div class="s-group"><div class="s-label">DECK</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="m-btn cancel" onclick="exportDeck();hideM()">&#x2B07; Export</button><button class="m-btn cancel" onclick="importDeck();hideM()">&#x2B06; Import</button><button class="m-btn cancel" style="color:var(--coral);border-color:var(--coral)" onclick="if(confirm('Clear entire deck?')){S.deck=[];saveDeck();render();hideM();toast('Cleared')}">&#x1F5D1; Clear</button></div></div>
+    <div class="s-group"><div class="s-label">DECK</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="m-btn cancel" onclick="exportDeck();hideM()">&#x2B07; Export</button><button class="m-btn cancel" onclick="importDeck();hideM()">&#x2B06; Import</button><button class="m-btn go" onclick="downloadOffline();hideM()">&#x2B07; Offline App</button><button class="m-btn cancel" style="color:var(--coral);border-color:var(--coral)" onclick="if(confirm('Clear entire deck?')){S.deck=[];saveDeck();render();hideM();toast('Cleared')}">&#x1F5D1; Clear</button></div>
+    <div class="s-hint" style="margin-top:8px"><strong>Offline App</strong> downloads a self-contained HTML file with all your GIFs baked in. Works with zero connectivity — open it in any browser or add to Home Screen.</div></div>
     <div class="m-actions"><button class="m-btn go" onclick="saveKeys();hideM()">Done</button></div>
   `);
   document.querySelectorAll('.s-toggle').forEach(el=>{el.onclick=()=>{const id=el.dataset.p;settings[id]=settings[id]||{};settings[id].on=!settings[id].on;el.classList.toggle('on');saveS()}});
@@ -498,6 +625,8 @@ function showHelp(){
         <li><strong>Import</strong> loads a deck. Add to Home Screen for app-like use.</li>
       </ul>
     </div>
+    <div class="h-divider"></div>
+    <div class="h-section" style="opacity:.6"><p style="font-size:11px;line-height:1.5;color:var(--text3)"><strong>Disclaimer:</strong> SneakerGif is an experimental app provided "as is" without warranty of any kind. Use at your own risk. GIF content is sourced from third-party APIs (Giphy, Imgur) and is subject to their respective terms of service. The developers are not responsible for any content displayed through this app.</p></div>
     <div class="m-actions"><button class="m-btn go" onclick="hideM()">Got it</button></div>
   `);
 }
