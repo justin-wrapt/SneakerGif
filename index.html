@@ -294,15 +294,15 @@ input,select{font-family:var(--mono);border:none;outline:none;background:none;co
 const CATS=['all','yes','no','mind-blown','laugh','think','celebrate','cringe','custom'];
 const POLL=600;
 const P={
-  giphy:{name:'Giphy',dk:'dc6zaTOxFJmzC',async search(q,k){const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${k}&q=${encodeURIComponent(q)}&limit=20&rating=pg-13`);const d=await r.json();return(d.data||[]).map(g=>({id:'giphy-'+g.id,url:g.images.fixed_width.url,preview:g.images.fixed_width_small?.url||g.images.fixed_width.url,w:+g.images.fixed_width.width,h:+g.images.fixed_width.height,title:g.title,prov:'giphy'}))}},
+  giphy:{name:'Giphy',dk:'',async search(q,k){if(!k)throw new Error('Giphy requires an API key. Get one free at developers.giphy.com');const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${k}&q=${encodeURIComponent(q)}&limit=20&rating=pg-13`);const d=await r.json();if(d.meta?.status===403)throw new Error('Giphy key invalid or banned');return(d.data||[]).map(g=>({id:'giphy-'+g.id,url:g.images.fixed_width.url,preview:g.images.fixed_width_small?.url||g.images.fixed_width.url,w:+g.images.fixed_width.width,h:+g.images.fixed_width.height,title:g.title,prov:'giphy'}))}},
   gfycat:{name:'Gfycat',dk:'',async search(q,k){const r=await fetch(`https://api.gfycat.com/v1/gfycats/search?search_text=${encodeURIComponent(q)}&count=20`);const d=await r.json();return(d.gfycats||[]).map(g=>({id:'gfy-'+g.gfyId,url:g.max2mbGif||g.gifUrl||g.gif100px,preview:g.gif100px||g.max2mbGif,w:g.width||480,h:g.height||270,title:g.title||g.gfyName,prov:'gfycat'}))}},
   imgur:{name:'Imgur',dk:'',async search(q,k){const h=k?{'Authorization':`Client-ID ${k}`}:{};const r=await fetch(`https://api.imgur.com/3/gallery/search/?q=${encodeURIComponent(q)}&q_type=anigif`,{headers:h});const d=await r.json();return(d.data||[]).flatMap(i=>i.images?i.images.filter(x=>x.animated):[i.animated?i:[]].flat()).slice(0,20).map(g=>({id:'img-'+g.id,url:g.link,preview:g.link,w:g.width||480,h:g.height||270,title:g.title||'GIF',prov:'imgur'}))}},
 };
 
-let S={mode:'prep',deck:[],cat:'all',results:[],busy:false,lastCmd:null,poll:null,prov:'giphy'};
+let S={mode:'prep',deck:[],cat:'all',results:[],busy:false,lastCmd:null,poll:null,prov:'gfycat'};
 let settings=loadS();
 
-function loadS(){try{const s=localStorage.getItem('sg-settings');return s?JSON.parse(s):{giphy:{key:P.giphy.dk,on:true},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}catch(e){return{giphy:{key:P.giphy.dk,on:true},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}}
+function loadS(){try{const s=localStorage.getItem('sg-settings');return s?JSON.parse(s):{giphy:{key:P.giphy.dk,on:true},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}catch(e){return{giphy:{key:'',on:false},gfycat:{key:'',on:true},imgur:{key:'',on:true}}}}
 function saveS(){try{localStorage.setItem('sg-settings',JSON.stringify(settings))}catch(e){}}
 function pk(id){return settings[id]?.key||P[id]?.dk||''}
 function pon(id){return settings[id]?.on!==false}
@@ -327,7 +327,7 @@ async function doSearch(q){
   try{
     if(S.prov==='all'){const rs=await Promise.all(eprov().map(id=>P[id].search(q,pk(id)).catch(()=>[])));S.results=rs.flat().sort(()=>Math.random()-.5).slice(0,24)}
     else{S.results=await P[S.prov].search(q,pk(S.prov))}
-  }catch(e){S.results=[];toast('Search failed')}
+  }catch(e){S.results=[];toast(e.message||'Search failed')}
   S.busy=false;render();
 }
 
@@ -429,7 +429,7 @@ function showSettings(){
   const rows=Object.entries(P).map(([id,p])=>`<div class="s-row"><span class="s-name">${p.name}</span><div class="s-toggle ${settings[id]?.on!==false?'on':''}" data-p="${id}"></div><input class="s-key" data-k="${id}" placeholder="${p.dk?'Default key':'API key'}" value="${settings[id]?.key||''}"></div>`).join('');
   showM(`
     <div class="m-title">SETTINGS</div>
-    <div class="s-group"><div class="s-label">GIF PROVIDERS</div>${rows}<div class="s-hint">Tap the toggle to enable/disable. Enter your API key or leave blank for defaults.</div></div>
+    <div class="s-group"><div class="s-label">GIF PROVIDERS</div>${rows}<div class="s-hint">Giphy requires your own key (free at developers.giphy.com). Gfycat needs no key. Imgur works without one but a Client-ID gives higher limits.</div></div>
     <div class="s-group"><div class="s-label">DECK</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="m-btn cancel" onclick="exportDeck();hideM()">&#x2B07; Export</button><button class="m-btn cancel" onclick="importDeck();hideM()">&#x2B06; Import</button><button class="m-btn cancel" style="color:var(--coral);border-color:var(--coral)" onclick="if(confirm('Clear entire deck?')){S.deck=[];saveDeck();render();hideM();toast('Cleared')}">&#x1F5D1; Clear</button></div></div>
     <div class="m-actions"><button class="m-btn go" onclick="saveKeys();hideM()">Done</button></div>
   `);
