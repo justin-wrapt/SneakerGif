@@ -129,6 +129,20 @@ input,select{font-family:inherit;border:none;outline:none;background:none;color:
 .settings-toggle.on::after{transform:translateX(20px)}
 .settings-hint{font-size:11px;color:var(--text3);line-height:1.4;margin-top:4px}
 
+/* Help */
+.help-section{margin-bottom:20px}
+.help-section h3{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.help-section h3 .h-icon{font-size:18px}
+.help-section p,.help-section li{font-size:13px;color:var(--text2);line-height:1.6}
+.help-section ul{padding-left:18px;margin-top:4px}
+.help-section li{margin-bottom:4px}
+.help-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle}
+.help-badge.prep{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.help-badge.live{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.help-badge.show{background:linear-gradient(135deg,var(--remote),var(--remote2));color:#fff}
+.help-badge.ctrl{background:linear-gradient(135deg,var(--remote),var(--remote2));color:#fff}
+.help-divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0}
+
 @keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fade-in .3s ease both}
 </style>
@@ -144,6 +158,7 @@ input,select{font-family:inherit;border:none;outline:none;background:none;color:
         <button class="mode-pill" data-mode="show">SHOW</button>
         <button class="mode-pill" data-mode="ctrl">CTRL</button>
       </div>
+      <button class="settings-btn" onclick="showHelp()">?</button>
       <button class="settings-btn" onclick="showSettings()">&#x2699;</button>
     </div>
   </div>
@@ -458,6 +473,89 @@ document.querySelectorAll('.mode-pill').forEach(el => { el.onclick = () => { sta
 document.getElementById('fullscreenClose').onclick = hideFullscreen;
 document.getElementById('fullscreen').onclick = e => { if (e.target === e.currentTarget) hideFullscreen(); };
 document.getElementById('modalOverlay').onclick = e => { if (e.target === e.currentTarget) hideModal(); };
+
+function showHelp() {
+  showModal(`
+    <div class="modal-title">How to Use GIF Reply</div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F3AF;</span> What is this?</h3>
+      <p>A GIF soundboard for conferences. Hold up your iPad showing a reaction GIF in response to something someone says. Think physical emoji, but animated.</p>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F4F1;</span> Two-Device Setup</h3>
+      <ul>
+        <li><strong>iPad mini</strong> &mdash; the display (faces the other person). Set to <span class="help-badge show">SHOW</span> mode.</li>
+        <li><strong>iPhone</strong> &mdash; your remote control. Set to <span class="help-badge ctrl">CTRL</span> mode. Tap a GIF and it appears on the iPad.</li>
+        <li><strong>Hotspot</strong> &mdash; turn on Personal Hotspot on iPhone. Connect iPad to it. This is your local network.</li>
+      </ul>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F3AC;</span> Four Modes</h3>
+      <ul>
+        <li><span class="help-badge prep">PREP</span> &mdash; Search for GIFs, cache them to your deck. Do this on WiFi before the event.</li>
+        <li><span class="help-badge live">LIVE</span> &mdash; Solo use. Tap any GIF to display it fullscreen. One device, no remote.</li>
+        <li><span class="help-badge show">SHOW</span> &mdash; Display mode (iPad). Sits waiting, shows whatever CTRL sends it.</li>
+        <li><span class="help-badge ctrl">CTRL</span> &mdash; Remote control (iPhone). Compact grid. Tap to send, bottom button to clear.</li>
+      </ul>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F50D;</span> Finding GIFs</h3>
+      <ul>
+        <li>In <span class="help-badge prep">PREP</span>, type in the search bar. Results come from your enabled providers.</li>
+        <li>Use the dropdown to search <strong>Giphy</strong>, <strong>Gfycat</strong>, <strong>Imgur</strong>, or <strong>ALL</strong> at once.</li>
+        <li>Or paste any GIF URL directly into the URL field below the search bar.</li>
+        <li>Tap a result to add it &mdash; pick a label and category, then it's cached to your deck as base64.</li>
+      </ul>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F511;</span> API Keys</h3>
+      <ul>
+        <li><strong>Giphy</strong> &mdash; ships with a public beta key. For higher limits, get your own at <em>developers.giphy.com</em>.</li>
+        <li><strong>Gfycat</strong> &mdash; public API, no key needed.</li>
+        <li><strong>Imgur</strong> &mdash; works without a key. For higher rate limits, get a Client-ID at <em>api.imgur.com</em>.</li>
+        <li>Configure keys in <strong>Settings</strong> (gear icon).</li>
+      </ul>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x1F4BE;</span> Offline &amp; Backup</h3>
+      <ul>
+        <li>GIFs are cached as base64 in your browser &mdash; <strong>no network needed to display them</strong>.</li>
+        <li>Use <strong>Export</strong> in settings to save your deck as a JSON file. AirDrop it between devices.</li>
+        <li>Use <strong>Import</strong> to load a deck from a JSON file.</li>
+        <li>Add to Home Screen on iPad/iPhone for a more app-like experience.</li>
+      </ul>
+    </div>
+    <div class="help-divider"></div>
+
+    <div class="help-section">
+      <h3><span class="h-icon">&#x26A1;</span> Quick Start</h3>
+      <p>1. Search &amp; add 10-20 GIFs in <span class="help-badge prep">PREP</span><br>
+      2. Export deck &amp; AirDrop to iPad<br>
+      3. iPad: import deck, switch to <span class="help-badge show">SHOW</span><br>
+      4. iPhone: switch to <span class="help-badge ctrl">CTRL</span><br>
+      5. Tap a GIF on iPhone &rarr; it appears on iPad</p>
+    </div>
+
+    <div class="modal-actions"><button class="modal-btn confirm" onclick="hideModal()">Got it</button></div>
+  `);
+}
+
+// Show help on first visit
+if (!localStorage.getItem('gif-help-seen')) {
+  setTimeout(showHelp, 400);
+  localStorage.setItem('gif-help-seen', '1');
+}
 
 loadDeck(); render();
 </script>
